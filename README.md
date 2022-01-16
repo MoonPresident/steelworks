@@ -1,3 +1,10 @@
+# Setup
+## Containerization
+https://www.redhat.com/sysadmin/podman-windows-wsl
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
