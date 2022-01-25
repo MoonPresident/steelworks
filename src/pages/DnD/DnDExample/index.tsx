@@ -6,6 +6,7 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
     width: 100%;
     padding: 32px;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -18,13 +19,13 @@ const Wrapper = styled.div`
     border-radius: 3px;
     `;
     
-    const droppableStyle = {
-        backgroundColor: '#555',
-        width: '250px',
-        height: '400px',
-        margin: '32px'
-    }
-    
+const droppableStyle = {
+    backgroundColor: '#555',
+    width: '250px',
+    height: '400px',
+    margin: '32px'
+}
+
 const Container = styled.div` 
     display: flex;
     flex-direction: row;
@@ -61,7 +62,7 @@ const DnDExample: React.FC = props => {
                     droppables.map((item: any, i: any) =>{
                         return ( 
                         <Droppable id ={"drop" + i} style={droppableStyle}>
-                            <Draggable id={"drag" + i} style={{margin: '8px'}}><Item>Lorem ipsem</Item></Draggable>
+                            <Draggable id={"drag" + i} style={{margin: '8px'}}><Item>Lorem ipsem {i}</Item></Draggable>
                         </Droppable>)
                     })
                 }
