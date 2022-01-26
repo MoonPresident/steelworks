@@ -12,86 +12,55 @@ import Utils from "./utils";
 const WebGL: React.FC = (props: any) => {
 
     const glRef = useRef<HTMLCanvasElement>(null);
-    const [ context2D, setContext2D ] = useState<CanvasRenderingContext2D>();
     const [ gl, setgl ] = useState<WebGL2RenderingContext>();
 
     const [ program, setProgram ] = useState<WebGLProgram>();
-    const [ VAO, setVAO ] = useState<WebGLVertexArrayObject>();
+    const [ vao, setVAO ] = useState<WebGLVertexArrayObject>();
 
     const [ canvasToDisplaySizeMap, setCanvasToDisplaySizeMap ] = useState<Map<any, any>>();
 
-    // const clear = (r: number, g: number, b: number, a: number) => {
-    //     gl.clearColor(r, g, b, a);
-    //     gl.clear(gl.COLOR_BUFFER_BIT);
-    // }
-
-    const generateShader = (gl: WebGL2RenderingContext, type: number, source: string) => {
-        const shader = gl.createShader(type);
-        if(!shader) { return }
-
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        
-        if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) { return shader; }
-       
-        console.log(gl.getShaderInfoLog(shader));
-        gl.deleteShader(shader);
-    }
-
-    const generateProgram = (gl: WebGL2RenderingContext, vertexShader: any, fragmentShader: any) => {
-        const program = gl.createProgram();
-        if(!program) { return }
-
-        gl.attachShader(program, vertexShader);
-        gl.attachShader(program, fragmentShader);
-        gl.linkProgram(program);
-        if (gl.getProgramParameter(program, gl.LINK_STATUS)) { return program; }
-       
-        console.log(gl.getProgramInfoLog(program));
-        gl.deleteProgram(program);
-    }
-
     useEffect(() => {
         const canvas = glRef.current;
-        if(!canvas) { return; }
+        if(!canvas) { console.log("1"); return; }
         const context = canvas.getContext('webgl2');
-        if (context == null) throw new Error('Could not get context');
+        if(context == null) throw new Error('Could not get context');
         setgl(context);
 
-        const vertexShader = generateShader(context, context.VERTEX_SHADER, BasicVertexShader);
-        const fragmentShader = generateShader(context, context.FRAGMENT_SHADER, BasicFragmentShader);
-        const positionBuffer = context?.createBuffer();
-        var vao = context?.createVertexArray();
+        const vertexShader = Utils.generateShader(context, context.VERTEX_SHADER, BasicVertexShader);
+        const fragmentShader = Utils.generateShader(context, context.FRAGMENT_SHADER, BasicFragmentShader);
+        const VAO = context ?.createVertexArray();
 
-        if(!vertexShader || !fragmentShader || !positionBuffer || !vao) { return }
+        if(!vertexShader || !fragmentShader || !VAO) {console.log("2"); return; }
 
-        //success = gl.getShaderParameter(shader, context.COMPILE_STATUS);
-        const prog = generateProgram(context, vertexShader, fragmentShader);
-        if(!prog) return;
+        const prog = Utils.generateProgram(context, vertexShader, fragmentShader);
+        if(!prog) {console.log("3");return;}
 
         setProgram(prog);
-        setVAO(vao);
-
-        context?.bindBuffer(context.ARRAY_BUFFER, positionBuffer);
-
-        const positions = [0, 0,    0, 0.5,     0.7, 0];
-        context?.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
-
-        context?.bindVertexArray(vao);
-
-        const positionAttributeLocation = context?.getAttribLocation(prog, "a_position");
-        if(positionAttributeLocation < 0) { return }
-        context?.enableVertexAttribArray(positionAttributeLocation);
-        context?.vertexAttribPointer(positionAttributeLocation, 2, context.FLOAT, false, 0, 0);
-
-        context?.clearColor(0, 0, 0, 0);
-        context?.clear(context.COLOR_BUFFER_BIT);
-
-        context?.useProgram(prog);
-        context?.bindVertexArray(vao);
-        context?.drawArrays(context.TRIANGLES, 0, 3);
-        context?.bindBuffer(context.ARRAY_BUFFER, null);
+        setVAO(VAO);
     }, []);
+
+    useEffect(() => {
+        const positionBuffer = gl?.createBuffer();
+        if(!gl || !positionBuffer || !vao || !program) { return; }
+        gl?.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+        const positions = [0, 0,    0, 0.2 + Math.random(),     0.3 + Math.random(), 0];
+        gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+        gl?.bindVertexArray(vao);
+
+        const positionAttributeLocation = gl?.getAttribLocation(program, "a_position");
+        if(positionAttributeLocation < 0) { return }
+        gl?.enableVertexAttribArray(positionAttributeLocation);
+        gl?.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+        Utils.clear(gl, 0, 0, 0, 0);
+
+        gl?.useProgram(program);
+        gl?.bindVertexArray(vao);
+        gl?.drawArrays(gl.TRIANGLES, 0, 3);
+        gl?.bindBuffer(gl.ARRAY_BUFFER, null);
+    });
 
     const clickGl = () => {
         // const elemBuffer = gl?.createBuffer();
@@ -107,7 +76,7 @@ const WebGL: React.FC = (props: any) => {
         
         //TODO: fix - Bad way of normalizing screen
         const rect = gl?.canvas.getBoundingClientRect();
-        if(program && VAO && glRef.current && rect?.width && rect.height) {
+        if(program && vao && glRef.current && rect?.width && rect.height) {
             const dpr = window.devicePixelRatio;
             const displayWidth  = Math.round(rect.width * dpr);
             const displayHeight = Math.round(rect.height * dpr);
@@ -123,7 +92,7 @@ const WebGL: React.FC = (props: any) => {
             const positions = [0, 0,    0, Math.random() * 0.8 + 0.2,     Math.random() * 0.7 + 0.3, 0];
             gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
     
-            gl?.bindVertexArray(VAO);
+            gl?.bindVertexArray(vao);
     
             const positionAttributeLocation = gl?.getAttribLocation(program, "a_position");
             console.log(positionAttributeLocation)

@@ -56,7 +56,7 @@ class App extends React.Component<{}, AppState> {
         super(props);
 
         this.state = {
-            target: <DnDExample/>,
+            target: <WebGL/>,
         };
     }
 
