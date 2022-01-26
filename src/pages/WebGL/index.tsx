@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { reduceEachTrailingCommentRange } from 'typescript';
 import BasicFragmentShader from './Shaders/fragmentShader';
 import BasicVertexShader from './Shaders/vertexShader';
+import Utils from "./utils";
 
 
 //https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
@@ -89,36 +90,22 @@ const WebGL: React.FC = (props: any) => {
         context?.useProgram(prog);
         context?.bindVertexArray(vao);
         context?.drawArrays(context.TRIANGLES, 0, 3);
+        context?.bindBuffer(context.ARRAY_BUFFER, null);
     }, []);
 
     const clickGl = () => {
-        const buffer = gl?.createBuffer();
-        if(buffer && VAO && program) {
-            gl?.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl?.bufferData(gl.ARRAY_BUFFER, 
-                new Float32Array([
-                    0.5, 0.5,// 0.0, 0.0,
-                    0.2, -0.8,// 0.0, 0.0,
-                    0.2, 0.8,// 0.0, 0.0
-                ]),
-                gl.STATIC_DRAW)
-            gl?.bindBuffer(gl.ARRAY_BUFFER, null);
-            gl?.bindVertexArray(VAO);
-            gl?.useProgram(program);
-            gl?.drawArrays(gl.TRIANGLES, 0, 3);
-        }
-
-        const elemBuffer = gl?.createBuffer();
-        if(elemBuffer) {
-            gl?.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, elemBuffer);
-            gl?.bufferData(gl.ELEMENT_ARRAY_BUFFER, 
-                new Float32Array([
-                    0, 1, 2
-                ]),
-                gl.STATIC_DRAW)
-            gl?.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        }
+        // const elemBuffer = gl?.createBuffer();
+        // if(elemBuffer) {
+        //     gl?.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, elemBuffer);
+        //     gl?.bufferData(gl.ELEMENT_ARRAY_BUFFER, 
+        //         new Float32Array([
+        //             0, 1, 2
+        //         ]),
+        //         gl.STATIC_DRAW)
+        //     gl?.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        // }
         
+        //TODO: fix - Bad way of normalizing screen
         const rect = gl?.canvas.getBoundingClientRect();
         if(program && VAO && glRef.current && rect?.width && rect.height) {
             const dpr = window.devicePixelRatio;
@@ -127,9 +114,29 @@ const WebGL: React.FC = (props: any) => {
             glRef.current.width = displayWidth;
             glRef.current.height = displayHeight;
             gl?.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-            gl?.useProgram(program);
+
+            const buffer = gl?.createBuffer();
+            if(!buffer) {return;}
+            
+            gl?.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+            const positions = [0, 0,    0, Math.random() * 0.8 + 0.2,     Math.random() * 0.7 + 0.3, 0];
+            gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    
             gl?.bindVertexArray(VAO);
+    
+            const positionAttributeLocation = gl?.getAttribLocation(program, "a_position");
+            console.log(positionAttributeLocation)
+            if(positionAttributeLocation === undefined || positionAttributeLocation < 0) { return }
+            gl?.enableVertexAttribArray(positionAttributeLocation);
+            gl?.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+    
+            gl?.clearColor(0, 0, 0, 0);
+            gl?.clear(gl.COLOR_BUFFER_BIT);
+    
+            gl?.useProgram(program);
             gl?.drawArrays(gl.TRIANGLES, 0, 3);
+            
         }
     };
 
@@ -139,11 +146,7 @@ const WebGL: React.FC = (props: any) => {
             width="100*vw"
             height="100*vh"
             style={{ border: "1px solid black", boxSizing: "border-box"}}
-            onClick={(e) => {
-                if(gl) {
-                    clickGl();
-                }
-            }}
+            onClick={(e) => {clickGl();}}
         >
         </canvas>
     )
