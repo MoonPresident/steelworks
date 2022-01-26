@@ -1,5 +1,3 @@
-import React from "react";
-
 namespace Utils {
     export function clear(gl:WebGL2RenderingContext, r: number, g: number, b: number, a: number) {
         gl.clearColor(r, g, b, a);
