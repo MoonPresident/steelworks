@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { reduceEachTrailingCommentRange } from 'typescript';
 import BasicFragmentShader from './Shaders/fragmentShader';
 import BasicVertexShader from './Shaders/vertexShader';
 import Utils from "./utils";
@@ -17,7 +16,7 @@ const WebGL: React.FC = (props: any) => {
     const [ program, setProgram ] = useState<WebGLProgram>();
     const [ vao, setVAO ] = useState<WebGLVertexArrayObject>();
 
-    const [ canvasToDisplaySizeMap, setCanvasToDisplaySizeMap ] = useState<Map<any, any>>();
+    // const [ canvasToDisplaySizeMap, setCanvasToDisplaySizeMap ] = useState<Map<any, any>>();
 
     useEffect(() => {
         const canvas = glRef.current;
@@ -28,7 +27,7 @@ const WebGL: React.FC = (props: any) => {
 
         const vertexShader = Utils.generateShader(context, context.VERTEX_SHADER, BasicVertexShader);
         const fragmentShader = Utils.generateShader(context, context.FRAGMENT_SHADER, BasicFragmentShader);
-        const VAO = context ?.createVertexArray();
+        const VAO = context?.createVertexArray();
 
         if(!vertexShader || !fragmentShader || !VAO) {console.log("2"); return; }
 
