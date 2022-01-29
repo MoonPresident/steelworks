@@ -1,6 +1,6 @@
 import React from 'react';
-import WebGL from '../WebGL';
-import DnDExample from '../DnD/DnDExample';
+import WebGLExample from '../../pages/WebGLExample';
+import DnDExample from '../DnDExample';
 import styled, { ThemeProvider } from 'styled-components';
 
 //https://css-tricks.com/dry-ing-up-styled-components/
@@ -21,6 +21,7 @@ const AppWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  height: 100vh;
 `;
 
 const Topbar = styled.div`
@@ -48,7 +49,7 @@ const PageTitle = styled.h4`
 `;
 
 interface AppState {
-    target: any;
+    targetIndex: any;
 }
 
 class App extends React.Component<{}, AppState> {
@@ -56,28 +57,43 @@ class App extends React.Component<{}, AppState> {
         super(props);
 
         this.state = {
-            target: <WebGL/>,
+            targetIndex: 0,
         };
     }
 
+    private programs = [ 
+        { component: <WebGLExample/>, description: "WebGL2 Example" },
+        { component: <DnDExample/>, description: "Drag and Drop Example" },
+        //Blender Model Renderer
+        //InfoSec
+        //Architecture
+        //Devops
+        //ML/DL/AI
+    ];
+
     render() {
         return (
-            <AppWrapper>
-                <ThemeProvider theme={theme}>
+            <ThemeProvider theme={theme}>
+                <AppWrapper>    
                     <Topbar>
                         <Title>Thomas Steel</Title>
-                        <PageTitle 
-                            onClick={e=>{console.log(e);this.setState({...this.state, target: <DnDExample/>})}}>
-                            Drag and Drop Example
-                        </PageTitle>
-                        <PageTitle 
-                            onClick={e=>{console.log(e);this.setState({...this.state, target: <WebGL/>})}}>
-                            WebGL2 Example
-                        </PageTitle>
+                        { this.programs.map((program, key) => {
+                            return (
+                                <PageTitle 
+                                    key={key}
+                                    children={program.description} 
+                                    onClick={e=>this.setState({...this.state, targetIndex: key})}
+                                />
+                            )    
+                        })}
                     </Topbar>
-                    {this.state.target}
-                </ThemeProvider>
-            </AppWrapper>
+
+                    {/* Render program */}
+                    {/* <div style={{"flex": "auto", "flexGrow": 2,"height":"100%"}}> */}
+                    { this.programs[this.state.targetIndex].component }
+                    {/* </div> */}
+                </AppWrapper>
+            </ThemeProvider>
         )
     }
 }
