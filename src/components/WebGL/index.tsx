@@ -10,63 +10,114 @@ import Utils from "./utils";
 
 interface WebGLProps {
     positions: Array<number>,
+    colors: Array<number>,
     clickGl: Function,
+    triangleCount: number,
 }
 
 const WebGL: React.FC<WebGLProps> = (props: WebGLProps) => {
 
-    const glRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const [ gl, setgl ] = useState<WebGL2RenderingContext>();
 
     const [ program, setProgram ] = useState<WebGLProgram>();
     const [ vao, setVAO ] = useState<WebGLVertexArrayObject>();
 
-    // const [ canvasToDisplaySizeMap, setCanvasToDisplaySizeMap ] = useState<Map<any, any>>();
+    const [ canvasToDisplaySizeMap, setCanvasToDisplaySizeMap ] = useState<Map<any, any>>();
+
+    const [ positionBuffer, setPositionBuffer ] = useState<WebGLBuffer>();
+    const [ colorBuffer, setColorBuffer ] = useState<WebGLBuffer>();
+    const onResize = (entries: any) => {
+        const newCanvasToDisplaySizeMap = new Map();
+        for (const entry of entries) {
+            const { displayWidth, displayHeight } = Utils.onResize(entry);
+            newCanvasToDisplaySizeMap.set(entry.target, [displayWidth, displayHeight]);
+          }
+          setCanvasToDisplaySizeMap(newCanvasToDisplaySizeMap);
+    }
 
     useEffect(() => {
-        const canvas = glRef.current;
-        if(!canvas) { console.log("1"); return; }
+        console.log("Updating canvas.")
+        const canvas = canvasRef.current;
+        if(!canvas) { console.log("ERROR: Canvas could not initialize."); return; }
         const context = canvas.getContext('webgl2');
         if(context == null) throw new Error('Could not get context');
         setgl(context);
-        // context.enable(context.CULL_FACE);
-        // context.enable(context.DEPTH_TEST);
 
+        //Configure WebGL
+        // context.enable(context.CULL_FACE);
+        context.enable(context.DEPTH_TEST);
+        context.depthFunc(context.LEQUAL);  
+
+        //Configure webgl program
         const vertexShader = Utils.generateShader(context, context.VERTEX_SHADER, BasicVertexShader);
         const fragmentShader = Utils.generateShader(context, context.FRAGMENT_SHADER, BasicFragmentShader);
         const VAO = context?.createVertexArray();
 
-        if(!vertexShader || !fragmentShader || !VAO) {console.log("2"); return; }
+        if(!vertexShader || !fragmentShader || !VAO) {console.log("ERROR: Problem initializing shaders and vao."); return; }
 
         const prog = Utils.generateProgram(context, vertexShader, fragmentShader);
-        if(!prog) {console.log("3");return;}
+        if(!prog) {console.log("ERROR: Problem generating program.");return;}
 
         setProgram(prog);
         setVAO(VAO);
-    }, []);
 
-    useEffect(() => {
-        const positionBuffer = gl?.createBuffer();
-        const colorBuffer = gl?.createBuffer();
-        if(!gl || !positionBuffer || !colorBuffer || !vao || !program) { return; }
+        const newPositionBuffer = context?.createBuffer();
+        const newColorBuffer = context?.createBuffer();
+        if(!newPositionBuffer || !newColorBuffer) {return;}
+        setPositionBuffer(newPositionBuffer);
+        setColorBuffer(newColorBuffer);
+
+        context.bindVertexArray(VAO);
+        context.bindBuffer(context.ARRAY_BUFFER, newPositionBuffer);
+        Utils.setVertexAttribPointer(context, prog, "a_position", 4, context.FLOAT, false, 0, 0);
+
+        context.bindBuffer(context.ARRAY_BUFFER, newColorBuffer);
+        Utils.setVertexAttribPointer(context, prog, "a_color", 3, context.UNSIGNED_BYTE, true, 0, 0);
+        
+        const resizeObserver = new ResizeObserver(onResize);
+        try {
+          // only call us of the number of device pixels changed
+          resizeObserver.observe(canvas, {box: 'device-pixel-content-box'});
+        } catch (ex) {
+          // device-pixel-content-box is not supported so fallback to this
+          resizeObserver.observe(canvas, {box: 'content-box'});
+        }
+        setCanvasToDisplaySizeMap(new Map([[canvas, [300, 150]]]));
+    }, [canvasRef]);
+
+    const renderWebGL = () => {
+        const canvas = canvasRef.current;
+        if(!program || !vao || !gl || !canvas || !canvasToDisplaySizeMap
+           || !positionBuffer || !colorBuffer) { return; }
+        
+        // Check and update the canvas if not the same size.
+        const [displayWidth, displayHeight] = canvasToDisplaySizeMap.get(canvas)
+
+        if (canvas.width  !== displayWidth || canvas.height !== displayHeight) {
+            canvas.width  = displayWidth;
+            canvas.height = displayHeight;
+            
+            gl?.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        }
+        
+
         gl?.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(props.positions), gl.DYNAMIC_DRAW);
 
-        console.log(props)
-        gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(props.positions), gl.STATIC_DRAW);
-
-        gl?.bindVertexArray(vao);
-
-        const positionAttributeLocation = gl?.getAttribLocation(program, "a_position");
-        if(positionAttributeLocation < 0) { return }
-        gl?.enableVertexAttribArray(positionAttributeLocation);
-        gl?.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-
+        gl?.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl?.bufferData(gl.ARRAY_BUFFER, new Uint8Array(props.colors), gl.DYNAMIC_DRAW); 
+ 
         Utils.clear(gl, 0, 0, 0, 0);
 
         gl?.useProgram(program);
-        gl?.bindVertexArray(vao);
-        gl?.drawArrays(gl.TRIANGLES, 0, 3);
+        gl?.drawArrays(gl.TRIANGLES, 0, props.triangleCount);
         gl?.bindBuffer(gl.ARRAY_BUFFER, null);
+        
+    }
+
+    useEffect(() => {
+       renderWebGL();
     });
 
     useEffect(() => {
@@ -80,48 +131,17 @@ const WebGL: React.FC<WebGLProps> = (props: WebGLProps) => {
         //         gl.STATIC_DRAW)
         //     gl?.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         // }
-        
-        //TODO: fix - Bad way of normalizing screen
-        const rect = gl?.canvas.getBoundingClientRect();
-        if(program && vao && glRef.current && rect?.width && rect.height) {
-            const dpr = window.devicePixelRatio;
-            const displayWidth  = Math.round(rect.width * dpr);
-            const displayHeight = Math.floor(rect.height * dpr);
-            glRef.current.width = displayWidth;
-            glRef.current.height = displayHeight;
-            gl?.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-            const buffer = gl?.createBuffer();
-            if(!buffer) {return;}
-            
-            gl?.bindBuffer(gl.ARRAY_BUFFER, buffer);
-
-            gl?.bufferData(gl.ARRAY_BUFFER, new Float32Array(props.positions), gl.STATIC_DRAW);
-    
-            gl?.bindVertexArray(vao);
-    
-            const positionAttributeLocation = gl?.getAttribLocation(program, "a_position");
-            console.log(positionAttributeLocation)
-            if(positionAttributeLocation === undefined || positionAttributeLocation < 0) { return }
-            
-            gl?.enableVertexAttribArray(positionAttributeLocation);
-            gl?.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-    
-            gl?.clearColor(0, 0, 0, 0);
-            gl?.clear(gl.COLOR_BUFFER_BIT);
-    
-            gl?.useProgram(program);
-            gl?.drawArrays(gl.TRIANGLES, 0, 3);
-            
-        }
+        renderWebGL();
     }, [props.positions]);
+
+    useEffect(()=>{}, []);
 
     return (
         <canvas
-            ref={glRef}
+            ref={canvasRef}
             width="100vw"
             height="100vh"
-            style={{ boxSizing: "border-box" }}
+            style={{ width: "100%", height: "100%", boxSizing: "border-box" }}
             onClick={(e) => {props.clickGl();}}
         >
         </canvas>
