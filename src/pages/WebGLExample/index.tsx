@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import WebGL from '../../components/WebGL';
 
 
@@ -44,7 +44,7 @@ const WebGLExample: React.FC = (props: any) => {
         randCol(), randCol(), randCol(), 1
     ]);
     
-    const clickGl = () => {
+    const clickGl = useCallback(() => {
         let x = randCoord();
         let y = randCoord();
         target.current = {x, y};
@@ -66,49 +66,52 @@ const WebGLExample: React.FC = (props: any) => {
             0, 100, randCol(), 1,
             0, 1, randCol(), 1,
         ]);
-    }
+    }, []);
 
-    const drawFrame = (time: number) => {
-        if(timestamp.current === 0) { 
-            console.log("ZERO");
-            timestamp.current = time; 
-            requestAnimationFrame(drawFrame); 
-            return; 
-        }
-        
-        const newTime = time - timestamp.current;
-        timestamp.current = time;
-        let x = current.current.x;
-        let y = current.current.y;
-
-        let dx = x - target.current.x;
-        let dy = y - target.current.y;
-
-        if(Math.abs(dx) < 0.001) { current.current = { x: target.current.x, y: current.current.y } }
-        else { x -= 0.0004 + (dx) * 0.8 * newTime * 0.001; }
-
-        if(Math.abs(dy) < 0.001) { current.current = { x: current.current.x, y: target.current.y } }
-        else { y -= 0.0004 + (dy) * 0.8 * newTime * 0.001; }
-
-        current.current = {x, y}
-
-        setPositions(prevPos => [
-            0, 0, 0, 1, 
-            -1, -1, 0, 1,
-            x, y, 0, 1,
-            0, 0, 0, 1,
-            -1, 1, 0, 1,
-            x, y, 0, 1,
-        ]);
-        animationRef.current = requestAnimationFrame(drawFrame);
-    }
+    
 
     useEffect(() => {
         clickGl();
 
+        const drawFrame = (time: number) => {
+            if(timestamp.current === 0) { 
+                console.log("ZERO");
+                timestamp.current = time; 
+                requestAnimationFrame(drawFrame); 
+                return; 
+            }
+            
+            const newTime = time - timestamp.current;
+            timestamp.current = time;
+            let x = current.current.x;
+            let y = current.current.y;
+    
+            let dx = x - target.current.x;
+            let dy = y - target.current.y;
+    
+            if(Math.abs(dx) < 0.001) { current.current = { x: target.current.x, y: current.current.y } }
+            else { x -= 0.0004 + (dx) * 0.8 * newTime * 0.001; }
+    
+            if(Math.abs(dy) < 0.001) { current.current = { x: current.current.x, y: target.current.y } }
+            else { y -= 0.0004 + (dy) * 0.8 * newTime * 0.001; }
+    
+            current.current = {x, y}
+    
+            setPositions(prevPos => [
+                0, 0, 0, 1, 
+                -1, -1, 0, 1,
+                x, y, 0, 1,
+                0, 0, 0, 1,
+                -1, 1, 0, 1,
+                x, y, 0, 1,
+            ]);
+            animationRef.current = requestAnimationFrame(drawFrame);
+        }
+        
+
         animationRef.current = requestAnimationFrame(drawFrame);
         return () => cancelAnimationFrame(animationRef.current);
-    }, []);
+    }, [clickGl]);
 
     useEffect(() => {
         const x = current.current.x;

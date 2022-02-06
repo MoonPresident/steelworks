@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BasicFragmentShader from '../../pages/WebGLExample/Shaders/fragmentShader';
 import BasicVertexShader from '../../pages/WebGLExample/Shaders/vertexShader';
 import Utils from "./utils";
@@ -86,7 +86,7 @@ const WebGL: React.FC<WebGLProps> = (props: WebGLProps) => {
         setCanvasToDisplaySizeMap(new Map([[canvas, [300, 150]]]));
     }, [canvasRef]);
 
-    const renderWebGL = () => {
+    const renderWebGL = useCallback(() => {
         const canvas = canvasRef.current;
         if(!program || !vao || !gl || !canvas || !canvasToDisplaySizeMap
            || !positionBuffer || !colorBuffer) { return; }
@@ -114,7 +114,7 @@ const WebGL: React.FC<WebGLProps> = (props: WebGLProps) => {
         gl?.drawArrays(gl.TRIANGLES, 0, props.triangleCount);
         gl?.bindBuffer(gl.ARRAY_BUFFER, null);
         
-    }
+    }, [canvasToDisplaySizeMap, colorBuffer, gl, positionBuffer, program, vao, props.triangleCount, props.colors, props.positions]);
 
     useEffect(() => {
        renderWebGL();
@@ -132,7 +132,7 @@ const WebGL: React.FC<WebGLProps> = (props: WebGLProps) => {
         //     gl?.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         // }
         renderWebGL();
-    }, [props.positions]);
+    }, [renderWebGL]);
 
     useEffect(()=>{}, []);
 

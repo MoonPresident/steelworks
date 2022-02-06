@@ -1,12 +1,12 @@
 
 
-const randCoord = () => {
-    return 2 * Math.random() - 1;
-};
+// const randCoord = () => {
+//     return 2 * Math.random() - 1;
+// };
 
-const randCol = () => {
-    return Math.floor(255 * Math.random());
-};
+// const randCol = () => {
+//     return Math.floor(255 * Math.random());
+// };
 
 abstract class GeometricObject {
     private vertices: Float32Array;
