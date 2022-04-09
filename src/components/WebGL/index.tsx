@@ -9,8 +9,8 @@ import Utils from "./utils";
 //https://webgl2fundamentals.org/
 
 interface WebGLProps {
-    positions: Array<number>,
-    colors: Array<number>,
+    positions: Float32Array,
+    colors: Uint8Array,
     clickGl: Function,
     triangleCount: number,
 }

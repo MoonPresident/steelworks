@@ -90,9 +90,9 @@ class App extends React.Component<{}, AppState> {
                     </Topbar>
 
                     {/* Render program */}
-                    {/* <div style={{"flex": "auto", "flexGrow": 2,"height":"100%"}}> */}
+                    <div style={{"flex": "auto", "height":"calc(100vh - 78px)"}}>
                     { this.programs[this.state.targetIndex].component }
-                    {/* </div> */}
+                    </div>
                 </AppWrapper>
             </ThemeProvider>
         )

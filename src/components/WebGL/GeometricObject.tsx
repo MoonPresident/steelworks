@@ -1,20 +1,14 @@
 
 
-// const randCoord = () => {
-//     return 2 * Math.random() - 1;
-// };
 
-// const randCol = () => {
-//     return Math.floor(255 * Math.random());
-// };
 
 abstract class GeometricObject {
-    private vertices: Float32Array;
-    private colors: Uint8Array;
+    protected vertices: Float32Array;
+    protected colors: Uint8Array;
 
-    private translate: Float32Array;
-    private rotate: Float32Array;
-    private scale: Float32Array;
+    protected translate: Float32Array;
+    protected rotate: Float32Array;
+    protected scale: Float32Array;
 
     constructor() {
         this.vertices = new Float32Array();
@@ -40,6 +34,14 @@ abstract class GeometricObject {
     getColors(): Uint8Array {
         return this.colors;
     }
+
+    randCoord (): number {
+        return 2 * Math.random() - 1;
+    };
+
+    randCol (): number {
+        return Math.floor(255 * Math.random());
+    };
 
     private arrayCopy(arrFrom: Float32Array, arrTo: Float32Array): void;
     

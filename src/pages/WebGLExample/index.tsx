@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import WebGL from '../../components/WebGL';
+import Cube from '../../components/WebGL/Cube';
+import GeometricObject from '../../components/WebGL/GeometricObject';
+
+import Triangle from "../../components/WebGL/Triangle"
 
 
 //https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext
@@ -12,6 +16,7 @@ import WebGL from '../../components/WebGL';
 
 const WebGLExample: React.FC = (props: any) => {
 
+    const geometric = useRef<GeometricObject>(new Triangle());
     const target = useRef<{x: number, y: number}>({x: 0, y: 0});
     const current = useRef<{x: number, y: number}>({x: 0.5, y: 0.8});
     const timestamp = useRef<number>(0);
@@ -26,46 +31,33 @@ const WebGLExample: React.FC = (props: any) => {
     };
     
     // const positions = useRef<Array<number>>([
-    const [ positions, setPositions ] = useState([
+    const [ positions, setPositions ] = useState<Float32Array>(new Float32Array([
         randCoord(), randCoord(), 0, 1,
         randCoord(), randCoord(), 0, 1,
         randCoord(), randCoord(), 0, 1,
         randCoord(), randCoord(), 0, 1,
         randCoord(), randCoord(), 0, 1,
         randCoord(), randCoord(), 0, 1,
-    ]);
+    ]));
 
-    const [ colors, setColors ] = useState([
+    const [ colors, setColors ] = useState<Uint8Array>(new Uint8Array([
         randCol(), randCol(), randCol(), 1,
         randCol(), randCol(), randCol(), 1,
         randCol(), randCol(), randCol(), 1,
         randCol(), randCol(), randCol(), 1,
         randCol(), randCol(), randCol(), 1,
         randCol(), randCol(), randCol(), 1
-    ]);
+    ]));
     
     const clickGl = useCallback(() => {
         let x = randCoord();
         let y = randCoord();
         target.current = {x, y};
         
-        // positions.current = [
-        //     0, 0, 0, 1, 
-        //     -1, -1, 0, 1,
-        //     x, y, 0, 1,
-        //     0, 0, 0, 1,
-        //     -1, 1, 0, 1,
-        //     x, y, 0, 1,
-        // ];
-
-        setColors([
-            randCol(), 0, randCol(), 1,
-            randCol(), 0, randCol(), 1,
-            randCol(), 0, randCol(), 1,
-            0, 200, randCol(), 1,
-            0, 100, randCol(), 1,
-            0, 1, randCol(), 1,
-        ]);
+        geometric.current.generateVertices();
+        setPositions(geometric.current.getVertices())
+        geometric.current.generateColors();
+        setColors(geometric.current.getColors())
     }, []);
 
     
@@ -97,14 +89,7 @@ const WebGLExample: React.FC = (props: any) => {
     
             current.current = {x, y}
     
-            setPositions(prevPos => [
-                0, 0, 0, 1, 
-                -1, -1, 0, 1,
-                x, y, 0, 1,
-                0, 0, 0, 1,
-                -1, 1, 0, 1,
-                x, y, 0, 1,
-            ]);
+            setPositions(prevPos => geometric.current.getVertices());
             animationRef.current = requestAnimationFrame(drawFrame);
         }
         
@@ -116,22 +101,21 @@ const WebGLExample: React.FC = (props: any) => {
     useEffect(() => {
         const x = current.current.x;
         const y = current.current.y;
-        setPositions([
+        setPositions(new Float32Array([
             0, 0, 0, 1, 
             -1, -1, 0, 1,
             x, y, 0, 1,
             0, 0, 0, 1,
             -1, 1, 0, 1,
             x, y, 0, 1,
-        ]);
+        ]));
     }, [current.current.x, current.current.y])
 
     return (
-        //https://www.newline.co/@andreeamaco/react-dropdown-tutorial-for-beginners-create-a-dropdown-menu-from-scratch--9831d197
-        <>
-            <form><select>
-                <option>Triangles</option>
-                <option>Cube</option>
+        <div style={{position: "relative", height: "inherit"}}>
+            <form style={{"zIndex": 1000, position: "absolute", top: 0, left: 0}}><select>
+                <option onClick={() => {geometric.current = new Triangle()}}>Triangles</option>
+                <option onClick={() => {geometric.current = new Cube()}}>Cube</option>
             </select></form>
             <WebGL
                 positions={positions}
@@ -139,7 +123,7 @@ const WebGLExample: React.FC = (props: any) => {
                 clickGl={clickGl}
                 triangleCount={6}
             />
-        </>
+        </div>
     )
 
 }
