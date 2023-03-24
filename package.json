@@ -1,6 +1,6 @@
 {
   "name": "steelworks",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
@@ -10,26 +10,32 @@
     "@types/node": "^12.20.28",
     "@types/react": "^17.0.27",
     "@types/react-dom": "^17.0.9",
+    "@wasm-tool/wasm-pack-plugin": "^1.6.0",
+    "eslint-config-next": "^13.1.1",
+    "next": "^13.1.1",
     "npm-update": "^2.1.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "^4.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "styled-components": "^5.3.1",
+    "turbo": "^1.7.0",
     "typescript": "^4.4.3",
     "vercel": "^23.1.2",
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "npm run build && npm run start"
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "next lint",
+    "all": "next lint && next dev",
+    "rust:dev": "cd latin-generator && cargo watch -i 'pkg/*' -s \"wasm-pack build\"",
+    "rust:build": "wasm-pack build crate",
+    "rust:test": "wasm-pack test --headless --firefox crate"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
-      "react-app/jest"
+      "react-app/jest",
+      "plugin:@next/next/recommended"
     ]
   },
   "browserslist": {
@@ -45,6 +51,7 @@
     ]
   },
   "devDependencies": {
-    "@types/styled-components": "^5.1.15"
+    "@types/styled-components": "^5.1.15",
+    "eslint-config-prettier": "^8.6.0"
   }
 }

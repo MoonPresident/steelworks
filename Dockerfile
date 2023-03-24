@@ -1,6 +1,9 @@
 # pull official base image
 FROM node:13.12.0-alpine
 
+#add compatability for turbopack.
+RUN apk add --no-cache libc6-compat
+
 # set working directory
 WORKDIR /app
 

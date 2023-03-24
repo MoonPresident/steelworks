@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 import Draggable from '../../components/DnD/Draggable';
 import Droppable from '../../components/DnD/Droppable';
@@ -61,8 +62,8 @@ const DnDExample: React.FC = props => {
                 {
                     droppables.map((item: any, i: any) =>{
                         return ( 
-                        <Droppable id ={"drop" + i} style={droppableStyle}>
-                            <Draggable id={"drag" + i} style={{margin: '8px'}}><Item>Lorem ipsem {i}</Item></Draggable>
+                        <Droppable key={i} id={"drop" + i} style={droppableStyle}>
+                            <Draggable key={i} id={"drag" + i} style={{margin: '8px'}}><Item>Lorem ipsem {i}</Item></Draggable>
                         </Droppable>)
                     })
                 }
