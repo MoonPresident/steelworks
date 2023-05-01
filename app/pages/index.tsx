@@ -1,6 +1,7 @@
 import React from 'react';
 import WebGLExample from './WebGLExample';
 import DnDExample from './DnDExample';
+import Puzzles from './Puzzles';
 import styled, { ThemeProvider } from 'styled-components';
 import Link from 'next/link';
 
@@ -65,6 +66,7 @@ class App extends React.Component<{}, AppState> {
     private programs = [ 
         { component: <WebGLExample/>, description: "WebGL2 Example" },
         { component: <DnDExample/>, description: "Drag and Drop Example" },
+        { component: <Puzzles/>, description: "Puzzles"}
         //https://reindernijhoff.net/2019/03/wolfenstein-raytracing-on-using-webgl1/
         //Blender Model Renderer
         //InfoSec

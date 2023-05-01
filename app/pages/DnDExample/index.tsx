@@ -2,7 +2,6 @@ import React from 'react';
 import Draggable from '../../components/DnD/Draggable';
 import Droppable from '../../components/DnD/Droppable';
 import styled from 'styled-components';
-// import * as wasm from "../../../latin-generator/pkg/latin_generator";
 
 const Wrapper = styled.div`
     width: 100%;
@@ -11,14 +10,14 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
-    `;
+`;
     
-    const Item = styled.div`
+const Item = styled.div`
     padding: 8px;
     color: #555;
     background-color: white;
     border-radius: 3px;
-    `;
+`;
     
 const droppableStyle = {
     backgroundColor: '#555',
@@ -50,11 +49,6 @@ const DnDExample: React.FC = props => {
             {id: "some bollocks", children: {}}
         ]);
     }
-
-    React.useEffect(()=>{
-        // wasm.greet();
-    }, []);
-
 
     return (
         <Wrapper>

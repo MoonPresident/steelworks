@@ -27,9 +27,9 @@
     "dev": "next dev",
     "lint": "next lint",
     "all": "next lint && next dev",
-    "rust:dev": "cd latin-generator && cargo watch -i 'pkg/*' -s \"wasm-pack build\"",
-    "rust:build": "wasm-pack build crate",
-    "rust:test": "wasm-pack test --headless --firefox crate"
+    "rust:dev": "cargo watch -i './latin-generator/pkg/*' -s \"wasm-pack build ./latin-generator\"",
+    "rust:build": "wasm-pack build ./latin-generator",
+    "rust:test": "wasm-pack test --headless --firefox ./latin-generator"
   },
   "eslintConfig": {
     "extends": [

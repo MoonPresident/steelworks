@@ -11,7 +11,7 @@ const Droppable: React.FC<IDroppable> = props => {
     const drop = (e: any) => {
         e.preventDefault();
         const data = e.dataTransfer.getData('transfer');
-        e.target.appendChild(document.getElementById(data));
+        e.currentTarget.appendChild(document.getElementById(data));
     }
 
     const allowDrop = (e: any) => {
